@@ -34,8 +34,8 @@ pub enum Lit {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct YearMonth {
-    year: u32,
-    month: Month,
+    pub year: u32,
+    pub month: Month,
 }
 
 impl YearMonth {
