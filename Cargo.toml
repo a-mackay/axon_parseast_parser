@@ -2,6 +2,14 @@
 name = "axon_parseast_parser"
 version = "0.1.0"
 authors = ["A Mackay <opensauceburner@outlook.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/a-mackay/axon_parseast_parser"
+documentation = "https://docs.rs/axon_parseast_parser"
+homepage = "https://github.com/a-mackay/axon_parseast_parser"
+description = """
+A library to parse the output of SkySpark's parseAst function.
+"""
 edition = "2018"
 
 [build-dependencies]
