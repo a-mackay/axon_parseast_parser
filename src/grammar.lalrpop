@@ -66,6 +66,7 @@ Bool: bool = {
 
 DictEntry: (TagName, Box<Val>) = {
     <tag_name:TagName> ":" <val:Val> => (tag_name, Box::new(val)),
+    <tag_name:TagName> => (tag_name, Box::new(Val::Lit(Lit::DictMarker))),
 }
 
 pub Str: String = {

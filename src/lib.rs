@@ -24,6 +24,7 @@ pub enum Val {
 pub enum Lit {
     Bool(bool),
     Date(NaiveDate),
+    DictMarker,
     Null,
     Num(Number),
     Str(String),
@@ -301,5 +302,11 @@ mod test {
     fn old_chart_demo_works() {
         let p = grammar::ValParser::new();
         p.parse(OLD_CHART_DEMO).unwrap();
+    }
+
+    #[test]
+    fn simple_dict_works() {
+        let p = grammar::ValParser::new();
+        p.parse(r#"{type:"dict", names:["markerTag", "numTag"], vals:[{type:"literal", val}, {type:"literal", val:1}]}"#).unwrap();
     }
 }
