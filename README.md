@@ -10,6 +10,7 @@ Parses the output of SkySpark's `parseAst` function.
 ## Unimplemented
 * Exponent numbers.
     * For example, `5e10` will not parse.
+* Hexadecimal numbers.
 * Hour format [0-9]?[0-9] in time parsing.
     * For example, `09:30:00` will parse, but `9:30:00` will not.
 * Fractional seconds in time parsing.
