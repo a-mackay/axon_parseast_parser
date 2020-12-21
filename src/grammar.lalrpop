@@ -1,6 +1,6 @@
 use chrono::{NaiveDate, NaiveTime};
 use crate::{Lit, Month, Val, YearMonth};
-use raystack::{Number, TagName};
+use raystack::{Number, Ref, TagName};
 use std::collections::HashMap;
 use std::str::FromStr;
 
@@ -11,6 +11,7 @@ pub Val: Val = {
     Date => Val::Lit(Lit::Date(<>)),
     Null => Val::Lit(Lit::Null),
     Num => Val::Lit(Lit::Num(<>)),
+    Ref => Val::Lit(Lit::Ref(<>)),
     Str => Val::Lit(Lit::Str(<>)),
     Time => Val::Lit(Lit::Time(<>)),
     Uri => Val::Lit(Lit::Uri(<>)),
@@ -53,6 +54,10 @@ pub Date: NaiveDate = {
     r"[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}" => {
         NaiveDate::parse_from_str(<>, "%Y-%m-%d").unwrap()
     }
+}
+
+Ref: Ref = {
+    r"@[a-zA-Z0-9_:\.~-]+" => Ref::new(<>.to_owned()).unwrap(),
 }
 
 Null: () = {

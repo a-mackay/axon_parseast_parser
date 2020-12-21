@@ -2,7 +2,7 @@
 extern crate lalrpop_util;
 
 use chrono::{NaiveDate, NaiveTime};
-use raystack::{Number, TagName};
+use raystack::{Number, Ref, TagName};
 use std::collections::HashMap;
 
 lalrpop_mod!(pub grammar); // synthesized by LALRPOP
@@ -28,6 +28,7 @@ pub enum Lit {
     DictRemoveMarker,
     Null,
     Num(Number),
+    Ref(Ref),
     Str(String),
     Time(NaiveTime),
     Uri(String),
@@ -315,5 +316,11 @@ mod test {
     fn dict_with_remove_marker_works() {
         let p = grammar::ValParser::new();
         p.parse(r#"{type:"dict", names:["deleteThisTag"], vals:[{type:"literal", val:removeMarker()}]}"#).unwrap();
+    }
+
+    #[test]
+    fn ref_works() {
+        let p = grammar::ValParser::new();
+        p.parse(r#"{type:"literal", val:@p:demo:r:276dcffa-13c94a57}"#).unwrap();
     }
 }
