@@ -1,6 +1,6 @@
 use chrono::{NaiveDate, NaiveTime};
 use crate::{Lit, Month, Val, YearMonth};
-use raystack::{Number, Ref, TagName};
+use raystack_core::{Number, Ref, TagName};
 use std::collections::HashMap;
 use std::str::FromStr;
 

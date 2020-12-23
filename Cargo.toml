@@ -1,6 +1,6 @@
 [package]
 name = "axon_parseast_parser"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["A Mackay <opensauceburner@outlook.com>"]
 license = "MIT"
 readme = "README.md"
@@ -11,6 +11,7 @@ description = """
 A library to parse the output of SkySpark's parseAst function.
 """
 edition = "2018"
+keywords = ["skyspark"]
 
 [build-dependencies]
 lalrpop = { version = "0.19.1", features = ["lexer"] }
@@ -18,5 +19,5 @@ lalrpop = { version = "0.19.1", features = ["lexer"] }
 [dependencies]
 chrono = "0.4"
 lalrpop-util = "0.19.1"
-raystack = "0.6"
+raystack_core = "0.1"
 regex = "1"

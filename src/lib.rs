@@ -2,7 +2,7 @@
 extern crate lalrpop_util;
 
 use chrono::{NaiveDate, NaiveTime};
-use raystack::{Number, Ref, TagName};
+use raystack_core::{Number, Ref, TagName};
 use std::collections::HashMap;
 
 lalrpop_mod!(pub grammar); // synthesized by LALRPOP

@@ -15,3 +15,5 @@ Parses the output of SkySpark's `parseAst` function.
     * For example, `09:30:00` will parse, but `9:30:00` will not.
 * Fractional seconds in time parsing.
     * For example, `09:30:00` will parse, but `09:30:00.123` will not.
+
+* Raw strings?
