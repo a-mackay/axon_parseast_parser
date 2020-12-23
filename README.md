@@ -15,5 +15,9 @@ Parses the output of SkySpark's `parseAst` function.
     * For example, `09:30:00` will parse, but `9:30:00` will not.
 * Fractional seconds in time parsing.
     * For example, `09:30:00` will parse, but `09:30:00.123` will not.
+* Units with unicode
+    * This is to improve compile times with LALRPOP.
+* Currency units
+    * This is to improve compile times with LALRPOP.
 
 * Raw strings?
