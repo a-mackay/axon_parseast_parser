@@ -89,7 +89,7 @@ mod test {
     use super::grammar;
     use super::{Lit, Month, Val, YearMonth};
     use chrono::{NaiveDate, NaiveTime};
-    use raystack::{Number, TagName};
+    use raystack_core::{Number, TagName};
     use std::collections::HashMap;
 
     const HELLO_WORLD: &str = r###"{type:"func", params:[], body:{type:"block", exprs:[{type:"literal", val:"hello world"}]}}"###;
