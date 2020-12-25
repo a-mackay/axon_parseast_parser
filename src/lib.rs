@@ -97,11 +97,11 @@ mod test {
     use std::collections::HashMap;
 
     const HELLO_WORLD: &str = r###"{type:"func", params:[], body:{type:"block", exprs:[{type:"literal", val:"hello world"}]}}"###;
-    const AHU_TEMP_DIFF: &str = include_str!("../test_input/ahu_temp_diff.txt");
-    const AHU_FUNC: &str = include_str!("../test_input/ahu_func.txt");
-    const EQUIP_FUNC: &str = include_str!("../test_input/equip_func.txt");
-    const OLD_CHART_DEMO: &str =
-        include_str!("../test_input/old_chart_demo.txt");
+    const DELETE_EQUIP: &str = include_str!("../test_input/delete_equip.txt");
+    const MISC_FUNC: &str = include_str!("../test_input/misc_func.txt");
+    const VALIDATE: &str = include_str!("../test_input/validate.txt");
+    const EVAL_FUNC_TEST: &str =
+        include_str!("../test_input/eval_func_test.txt");
 
     #[test]
     fn it_works() {
@@ -299,27 +299,27 @@ mod test {
     }
 
     #[test]
-    fn ahu_temp_diff_works() {
+    fn delete_equip_works() {
         let p = grammar::ValParser::new();
-        p.parse(AHU_TEMP_DIFF).unwrap();
+        p.parse(DELETE_EQUIP).unwrap();
     }
 
     #[test]
-    fn ahu_func_works() {
+    fn misc_func_works() {
         let p = grammar::ValParser::new();
-        p.parse(AHU_FUNC).unwrap();
+        p.parse(MISC_FUNC).unwrap();
     }
 
     #[test]
-    fn equip_func_works() {
+    fn validate_works() {
         let p = grammar::ValParser::new();
-        p.parse(EQUIP_FUNC).unwrap();
+        p.parse(VALIDATE).unwrap();
     }
 
     #[test]
-    fn old_chart_demo_works() {
+    fn eval_func_test_works() {
         let p = grammar::ValParser::new();
-        p.parse(OLD_CHART_DEMO).unwrap();
+        p.parse(EVAL_FUNC_TEST).unwrap();
     }
 
     #[test]
