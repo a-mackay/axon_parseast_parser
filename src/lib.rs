@@ -13,6 +13,7 @@ pub fn parse(axon: &str) -> Result<Val, impl std::error::Error + '_> {
     parser.parse(axon)
 }
 
+/// An Axon value.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Val {
     Dict(HashMap<TagName, Box<Val>>),
@@ -20,6 +21,7 @@ pub enum Val {
     Lit(Lit),
 }
 
+/// An Axon literal.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Lit {
     Bool(bool),
@@ -35,6 +37,7 @@ pub enum Lit {
     YearMonth(YearMonth),
 }
 
+/// Represents a month in a specific year.
 #[derive(Clone, Debug, PartialEq)]
 pub struct YearMonth {
     pub year: u32,
@@ -47,6 +50,7 @@ impl YearMonth {
     }
 }
 
+/// Represents a month of a year.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Month {
     Jan,
@@ -238,21 +242,33 @@ mod test {
     }
 
     #[test]
-    fn float_parser_works() {
-        let p = grammar::FloatParser::new();
-        assert_eq!(p.parse("123").unwrap(), 123.0);
-        assert_eq!(p.parse("-123").unwrap(), -123.0);
-        assert_eq!(p.parse("123.45").unwrap(), 123.45);
-        assert_eq!(p.parse("-123.45").unwrap(), -123.45);
-    }
-
-    #[test]
     fn number_parser_no_units_works() {
         let p = grammar::NumParser::new();
         assert_eq!(p.parse("123").unwrap(), Number::new(123.0, None));
         assert_eq!(p.parse("-123").unwrap(), Number::new(-123.0, None));
         assert_eq!(p.parse("123.45").unwrap(), Number::new(123.45, None));
         assert_eq!(p.parse("-123.45").unwrap(), Number::new(-123.45, None));
+    }
+
+    #[test]
+    fn number_parser_unicode_units_works() {
+        let p = grammar::NumParser::new();
+        assert_eq!(
+            p.parse("123psi/°F").unwrap(),
+            Number::new(123.0, Some("psi/°F".to_owned()))
+        );
+        assert_eq!(
+            p.parse("-123m²/N").unwrap(),
+            Number::new(-123.0, Some("m²/N".to_owned()))
+        );
+        assert_eq!(
+            p.parse("123.45dBµV").unwrap(),
+            Number::new(123.45, Some("dBµV".to_owned()))
+        );
+        assert_eq!(
+            p.parse("-123.45gH₂O/kgAir").unwrap(),
+            Number::new(-123.45, Some("gH₂O/kgAir".to_owned()))
+        );
     }
 
     #[test]
