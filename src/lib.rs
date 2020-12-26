@@ -435,4 +435,16 @@ mod test {
         let p = grammar::ValParser::new();
         p.parse(r#"{type:"func", params:[], body:{type:"dict", names:["symTag", "testTag"], vals:[{type:"literal", val:^steam-boiler}, {type:"literal", val}]}}"#).unwrap();
     }
+
+    #[test]
+    fn dict_containing_qname_works() {
+        let p = grammar::ValParser::new();
+        p.parse(r#"{type:"call", target:{type:"var", name:"core::parseNumber"}, args:[{type:"literal", val:"123"}]}"#).unwrap();
+    }
+
+    #[test]
+    fn dict_containing_partial_call_works() {
+        let p = grammar::ValParser::new();
+        p.parse(r#"{type:"partialCall", target:{type:"var", name:"utilsAssert"}, args:[null, null]}"#).unwrap();
+    }
 }
