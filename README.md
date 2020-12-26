@@ -16,7 +16,6 @@ Parses the output of SkySpark's `parseAst` function.
 * Exponent numbers.
     * For example, `5e10` will not parse.
     * Why? Exponent numbers are currently not supported in the `raystack_core` dependency.
-* Hexadecimal numbers.
 * Hour format [0-9]?[0-9] in time parsing.
     * For example, `09:30:00` will parse, but `9:30:00` will not.
     * Why? To simplify the LALRPOP grammar code.
