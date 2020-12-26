@@ -1,6 +1,6 @@
 [package]
 name = "axon_parseast_parser"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["A Mackay <opensauceburner@outlook.com>"]
 license = "MIT"
 readme = "README.md"
