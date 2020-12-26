@@ -1,6 +1,6 @@
 use chrono::{NaiveDate, NaiveTime};
 use crate::{Lit, Month, Val, YearMonth};
-use raystack_core::{Number, Ref, TagName};
+use raystack_core::{Number, Ref, Symbol, TagName};
 use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
@@ -14,6 +14,7 @@ pub Val: Val = {
     Num => Val::Lit(Lit::Num(<>)),
     Ref => Val::Lit(Lit::Ref(<>)),
     Str => Val::Lit(Lit::Str(<>)),
+    Symbol => Val::Lit(Lit::Symbol(<>)),
     Time => Val::Lit(Lit::Time(<>)),
     Uri => Val::Lit(Lit::Uri(<>)),
     YearMonth => Val::Lit(Lit::YearMonth(<>)),
@@ -57,7 +58,7 @@ pub Date: NaiveDate = {
     }
 }
 
-Ref: Ref = {
+pub Ref: Ref = {
     r"@[a-zA-Z0-9_:\.~-]+" => Ref::new(<>.to_owned()).unwrap(),
 }
 
@@ -120,4 +121,8 @@ pub Uri: String = {
 
 pub TagName: TagName = {
     r"[a-z]([a-zA-Z0-9_])*" => TagName::new(<>.to_owned()).unwrap(),
+}
+
+pub Symbol: Symbol = {
+    r"\^[a-z][a-zA-Z0-9:_-]*" => Symbol::new(<>.to_owned()).unwrap(),
 }

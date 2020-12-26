@@ -19,5 +19,5 @@ lalrpop = { version = "0.19.1", features = ["lexer"] }
 [dependencies]
 chrono = "0.4"
 lalrpop-util = "0.19.1"
-raystack_core = "0.1"
+raystack_core = "0.2.1"
 regex = "1"

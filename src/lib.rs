@@ -2,7 +2,7 @@
 extern crate lalrpop_util;
 
 use chrono::{NaiveDate, NaiveTime};
-use raystack_core::{Number, Ref, TagName};
+use raystack_core::{Number, Ref, Symbol, TagName};
 use std::collections::HashMap;
 
 lalrpop_mod!(pub grammar); // synthesized by LALRPOP
@@ -32,6 +32,7 @@ pub enum Lit {
     Num(Number),
     Ref(Ref),
     Str(String),
+    Symbol(Symbol),
     Time(NaiveTime),
     Uri(String),
     YearMonth(YearMonth),
@@ -93,7 +94,7 @@ mod test {
     use super::grammar;
     use super::{Lit, Month, Val, YearMonth};
     use chrono::{NaiveDate, NaiveTime};
-    use raystack_core::{Number, TagName};
+    use raystack_core::{Number, Ref, Symbol, TagName};
     use std::collections::HashMap;
 
     const HELLO_WORLD: &str = r###"{type:"func", params:[], body:{type:"block", exprs:[{type:"literal", val:"hello world"}]}}"###;
@@ -103,9 +104,24 @@ mod test {
     const EVAL_FUNC_TEST: &str =
         include_str!("../test_input/eval_func_test.txt");
 
-    #[test]
-    fn it_works() {
-        assert_eq!(1 + 1, 2);
+    fn tn(s: &str) -> TagName {
+        TagName::new(s.to_owned()).unwrap()
+    }
+
+    fn str_lit_val(s: &str) -> Val {
+        Val::Lit(str_lit(s))
+    }
+
+    fn num_lit_val(n: f64) -> Val {
+        Val::Lit(num_lit(n))
+    }
+
+    fn str_lit(s: &str) -> Lit {
+        Lit::Str(s.to_owned())
+    }
+
+    fn num_lit(n: f64) -> Lit {
+        Lit::Num(Number::new(n, None))
     }
 
     #[test]
@@ -324,19 +340,105 @@ mod test {
 
     #[test]
     fn simple_dict_works() {
+        // let p = grammar::ValParser::new();
+        // let mut map = HashMap::new();
+        // map.insert(tn("markerTag"), Box::new(Val::Lit(Lit::DictMarker)));
+        // map.insert(tn("numTag"), Box::new(num_lit_val(1.0)));
+        // let expected = Val::Dict(map);
+
         let p = grammar::ValParser::new();
-        p.parse(r#"{type:"dict", names:["markerTag", "numTag"], vals:[{type:"literal", val}, {type:"literal", val:1}]}"#).unwrap();
+
+        let mut map = HashMap::new();
+        map.insert(tn("type"), Box::new(str_lit_val("dict")));
+        let names = Val::List(vec![str_lit_val("markerTag"), str_lit_val("numTag")]);
+        map.insert(tn("names"), Box::new(names));
+
+        // Create the literal dict
+        let mut sub_map1 = HashMap::new();
+        sub_map1.insert(tn("type"), Box::new(str_lit_val("literal")));
+        sub_map1.insert(tn("val"), Box::new(Val::Lit(Lit::DictMarker)));
+        let lit_val1 = Val::Dict(sub_map1);
+
+        // Create the literal dict
+        let mut sub_map2 = HashMap::new();
+        sub_map2.insert(tn("type"), Box::new(str_lit_val("literal")));
+        sub_map2.insert(tn("val"), Box::new(num_lit_val(1.0)));
+        let lit_val2 = Val::Dict(sub_map2);
+
+        let vals = Val::List(vec![lit_val1, lit_val2]);
+        map.insert(tn("vals"), Box::new(vals));
+        let expected = Val::Dict(map);
+
+        let val = p.parse(r#"{type:"dict", names:["markerTag", "numTag"], vals:[{type:"literal", val}, {type:"literal", val:1}]}"#).unwrap();
+        assert_eq!(val, expected);
     }
 
     #[test]
     fn dict_with_remove_marker_works() {
         let p = grammar::ValParser::new();
-        p.parse(r#"{type:"dict", names:["deleteThisTag"], vals:[{type:"literal", val:removeMarker()}]}"#).unwrap();
+
+        let mut map = HashMap::new();
+        map.insert(tn("type"), Box::new(str_lit_val("dict")));
+        let names = Val::List(vec![str_lit_val("deleteThisTag")]);
+        map.insert(tn("names"), Box::new(names));
+
+        // Create the literal dict
+        let mut sub_map = HashMap::new();
+        sub_map.insert(tn("type"), Box::new(str_lit_val("literal")));
+        sub_map.insert(tn("val"), Box::new(Val::Lit(Lit::DictRemoveMarker)));
+        let lit_val = Val::Dict(sub_map);
+
+        let vals = Val::List(vec![lit_val]);
+        map.insert(tn("vals"), Box::new(vals));
+        let expected = Val::Dict(map);
+
+        let val = p.parse(r#"{type:"dict", names:["deleteThisTag"], vals:[{type:"literal", val:removeMarker()}]}"#).unwrap();
+        assert_eq!(val, expected);
     }
 
     #[test]
     fn ref_works() {
+        let p = grammar::RefParser::new();
+        let expected = Ref::new("@p:demo:r:276dcffa-13c94a57".to_owned()).unwrap();
+        let val = p.parse("@p:demo:r:276dcffa-13c94a57").unwrap();
+        assert_eq!(val, expected);
+    }
+
+    #[test]
+    fn ref_literal_works() {
         let p = grammar::ValParser::new();
-        p.parse(r#"{type:"literal", val:@p:demo:r:276dcffa-13c94a57}"#).unwrap();
+        let r = Ref::new("@p:demo:r:276dcffa-13c94a57".to_owned()).unwrap();
+        let mut map = HashMap::new();
+        map.insert(tn("type"), Box::new(str_lit_val("literal")));
+        map.insert(tn("val"), Box::new(Val::Lit(Lit::Ref(r))));
+        let expected = Val::Dict(map);
+        let val = p.parse(r#"{type:"literal", val:@p:demo:r:276dcffa-13c94a57}"#).unwrap();
+        assert_eq!(val, expected);
+    }
+
+    #[test]
+    fn symbol_works() {
+        let p = grammar::SymbolParser::new();
+        let expected = Symbol::new("^steam-boiler".to_owned()).unwrap();
+        let val = p.parse("^steam-boiler").unwrap();
+        assert_eq!(val, expected);
+    }
+
+    #[test]
+    fn symbol_literal_works() {
+        let p = grammar::ValParser::new();
+        let sym = Symbol::new("^steam-boiler".to_owned()).unwrap();
+        let mut map = HashMap::new();
+        map.insert(tn("type"), Box::new(str_lit_val("literal")));
+        map.insert(tn("val"), Box::new(Val::Lit(Lit::Symbol(sym))));
+        let expected = Val::Dict(map);
+        let val = p.parse(r#"{type:"literal", val:^steam-boiler}"#).unwrap();
+        assert_eq!(val, expected);
+    }
+
+    #[test]
+    fn func_containing_symbol_works() {
+        let p = grammar::ValParser::new();
+        p.parse(r#"{type:"func", params:[], body:{type:"dict", names:["symTag", "testTag"], vals:[{type:"literal", val:^steam-boiler}, {type:"literal", val}]}}"#).unwrap();
     }
 }
