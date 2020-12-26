@@ -340,12 +340,6 @@ mod test {
 
     #[test]
     fn simple_dict_works() {
-        // let p = grammar::ValParser::new();
-        // let mut map = HashMap::new();
-        // map.insert(tn("markerTag"), Box::new(Val::Lit(Lit::DictMarker)));
-        // map.insert(tn("numTag"), Box::new(num_lit_val(1.0)));
-        // let expected = Val::Dict(map);
-
         let p = grammar::ValParser::new();
 
         let mut map = HashMap::new();
