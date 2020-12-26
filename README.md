@@ -23,5 +23,3 @@ Parses the output of SkySpark's `parseAst` function.
 * Fractional seconds in time parsing.
     * For example, `09:30:00` will parse, but `09:30:00.123` will not.
     * Why? To simplify the LALRPOP grammar code.
-* Raw strings may not work, it depends how `parseAst` serializes them, I need to test this.
-    * For example, `r"abc123"` in Axon may not parse.
