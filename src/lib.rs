@@ -3,7 +3,9 @@ extern crate lalrpop_util;
 
 use chrono::{NaiveDate, NaiveTime};
 use raystack_core::{Number, Ref, Symbol, TagName};
+use regex::Regex;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 lalrpop_mod!(pub grammar); // synthesized by LALRPOP
 
@@ -11,6 +13,52 @@ lalrpop_mod!(pub grammar); // synthesized by LALRPOP
 pub fn parse(axon: &str) -> Result<Val, impl std::error::Error + '_> {
     let parser = grammar::ValParser::new();
     parser.parse(axon)
+}
+
+pub(crate) fn str_to_number(s: &str) -> Number {
+    let re = Regex::new(r".+E(-?\d+).*").unwrap();
+    let captures = re.captures(s);
+
+    if let Some(captures) = captures {
+        dbg!(&captures);
+        let exp: i32 = captures.get(1).unwrap_or_else(|| panic!("exponent capture should contain index = 1, {}", s)).as_str().parse().unwrap_or_else(|_| panic!("exponent capture 1 should be a string containing an i32, {}", s));
+        let delimiter = format!("E{}", exp);
+        let mut split = s.split(&delimiter);
+        let base = split
+            .next()
+            .unwrap_or_else(|| {
+                panic!("splitting on E\\d+ should leave a base, {}", s)
+            })
+            .parse()
+            .unwrap_or_else(|_| {
+                panic!("base should be a string containing a f64")
+            });
+        let unit = split.next().map(|unit_str| unit_str.to_owned());
+        let unit = normalize_unit(unit);
+
+        Number::new_exponent(base, exp, unit)
+    } else {
+        let no_exp_re = Regex::new(r"(-?\d+(\.\d+)?)([^0-9]*)").unwrap();
+        let captures = no_exp_re.captures(s).unwrap();
+
+        let float_str = captures.get(1).unwrap().as_str();
+        let float = f64::from_str(float_str).unwrap();
+
+        let unit = captures.get(3).map(|cap| cap.as_str().to_owned());
+        let unit = normalize_unit(unit);
+
+        Number::new(float, unit)
+    }
+}
+
+fn normalize_unit(unit: Option<String>) -> Option<String> {
+    match unit {
+        None => None,
+        Some(raw_unit) => match &raw_unit[..] {
+            "" => None,
+            _ => Some(raw_unit),
+        },
+    }
 }
 
 /// An Axon value.
@@ -92,7 +140,7 @@ impl Month {
 #[cfg(test)]
 mod test {
     use super::grammar;
-    use super::{Lit, Month, Val, YearMonth};
+    use super::{str_to_number, Lit, Month, Val, YearMonth};
     use chrono::{NaiveDate, NaiveTime};
     use raystack_core::{Number, Ref, Symbol, TagName};
     use std::collections::HashMap;
@@ -103,6 +151,87 @@ mod test {
     const VALIDATE: &str = include_str!("../test_input/validate.txt");
     const EVAL_FUNC_TEST: &str =
         include_str!("../test_input/eval_func_test.txt");
+
+    #[test]
+    fn str_to_number_works() {
+        assert_eq!(str_to_number("1"), Number::new(1.0, None));
+        assert_eq!(
+            str_to_number("1min"),
+            Number::new(1.0, Some("min".to_owned()))
+        );
+        assert_eq!(str_to_number("-1"), Number::new(-1.0, None));
+        assert_eq!(
+            str_to_number("-1min"),
+            Number::new(-1.0, Some("min".to_owned()))
+        );
+        assert_eq!(str_to_number("1.2"), Number::new(1.2, None));
+        assert_eq!(
+            str_to_number("1.2min"),
+            Number::new(1.2, Some("min".to_owned()))
+        );
+        assert_eq!(str_to_number("-1.2"), Number::new(-1.2, None));
+        assert_eq!(
+            str_to_number("-1.2min"),
+            Number::new(-1.2, Some("min".to_owned()))
+        );
+
+        assert_eq!(str_to_number("1E7"), Number::new_exponent(1.0, 7, None));
+        assert_eq!(
+            str_to_number("1E7min"),
+            Number::new_exponent(1.0, 7, Some("min".to_owned()))
+        );
+        assert_eq!(str_to_number("-1E7"), Number::new_exponent(-1.0, 7, None));
+        assert_eq!(
+            str_to_number("-1E7min"),
+            Number::new_exponent(-1.0, 7, Some("min".to_owned()))
+        );
+        assert_eq!(str_to_number("1.2E7"), Number::new_exponent(1.2, 7, None));
+        assert_eq!(
+            str_to_number("1.2E7min"),
+            Number::new_exponent(1.2, 7, Some("min".to_owned()))
+        );
+        assert_eq!(
+            str_to_number("-1.2E7"),
+            Number::new_exponent(-1.2, 7, None)
+        );
+        assert_eq!(
+            str_to_number("-1.2E7min"),
+            Number::new_exponent(-1.2, 7, Some("min".to_owned()))
+        );
+
+        assert_eq!(
+            str_to_number("1E789"),
+            Number::new_exponent(1.0, 789, None)
+        );
+        assert_eq!(
+            str_to_number("1E789min"),
+            Number::new_exponent(1.0, 789, Some("min".to_owned()))
+        );
+        assert_eq!(
+            str_to_number("-1E789"),
+            Number::new_exponent(-1.0, 789, None)
+        );
+        assert_eq!(
+            str_to_number("-1E789min"),
+            Number::new_exponent(-1.0, 789, Some("min".to_owned()))
+        );
+        assert_eq!(
+            str_to_number("1.2E789"),
+            Number::new_exponent(1.2, 789, None)
+        );
+        assert_eq!(
+            str_to_number("1.2E789min"),
+            Number::new_exponent(1.2, 789, Some("min".to_owned()))
+        );
+        assert_eq!(
+            str_to_number("-1.2E789"),
+            Number::new_exponent(-1.2, 789, None)
+        );
+        assert_eq!(
+            str_to_number("-1.2E789min"),
+            Number::new_exponent(-1.2, 789, Some("min".to_owned()))
+        );
+    }
 
     fn tn(s: &str) -> TagName {
         TagName::new(s.to_owned()).unwrap()
@@ -321,6 +450,27 @@ mod test {
     }
 
     #[test]
+    fn number_parser_exponents_works() {
+        let p = grammar::NumParser::new();
+        assert_eq!(
+            p.parse("1E47").unwrap(),
+            Number::new_exponent(1.0, 47, None)
+        );
+        assert_eq!(
+            p.parse("-1.23E47min").unwrap(),
+            Number::new_exponent(-1.23, 47, Some("min".to_owned()))
+        );
+        assert_eq!(
+            p.parse("1.23E-18").unwrap(),
+            Number::new_exponent(1.23, -18, None)
+        );
+        assert_eq!(
+            p.parse("-1E-18min").unwrap(),
+            Number::new_exponent(-1.0, -18, Some("min".to_owned()))
+        );
+    }
+
+    #[test]
     fn hello_world_works() {
         let p = grammar::ValParser::new();
         p.parse(HELLO_WORLD).unwrap();
@@ -356,7 +506,8 @@ mod test {
 
         let mut map = HashMap::new();
         map.insert(tn("type"), Box::new(str_lit_val("dict")));
-        let names = Val::List(vec![str_lit_val("markerTag"), str_lit_val("numTag")]);
+        let names =
+            Val::List(vec![str_lit_val("markerTag"), str_lit_val("numTag")]);
         map.insert(tn("names"), Box::new(names));
 
         // Create the literal dict
@@ -405,7 +556,8 @@ mod test {
     #[test]
     fn ref_works() {
         let p = grammar::RefParser::new();
-        let expected = Ref::new("@p:demo:r:276dcffa-13c94a57".to_owned()).unwrap();
+        let expected =
+            Ref::new("@p:demo:r:276dcffa-13c94a57".to_owned()).unwrap();
         let val = p.parse("@p:demo:r:276dcffa-13c94a57").unwrap();
         assert_eq!(val, expected);
     }
@@ -418,7 +570,9 @@ mod test {
         map.insert(tn("type"), Box::new(str_lit_val("literal")));
         map.insert(tn("val"), Box::new(Val::Lit(Lit::Ref(r))));
         let expected = Val::Dict(map);
-        let val = p.parse(r#"{type:"literal", val:@p:demo:r:276dcffa-13c94a57}"#).unwrap();
+        let val = p
+            .parse(r#"{type:"literal", val:@p:demo:r:276dcffa-13c94a57}"#)
+            .unwrap();
         assert_eq!(val, expected);
     }
 

@@ -11,8 +11,3 @@ Parses the output of SkySpark's `parseAst` function.
 1. It's substantially more involved to parse Axon, instead of `parseAst`'s output.
     * We can parse `parseAst` output in under 200 lines of LALRPOP grammar.
 1. Axon appears to be an ambiguous language to parse (at least LALRPOP was claiming it was ambiguous).
-
-## Unimplemented
-* Exponent numbers.
-    * For example, `5e10` will not parse.
-    * Why? Exponent numbers are currently not supported in the `raystack_core` dependency.

@@ -1,7 +1,6 @@
 use chrono::{NaiveDate, NaiveTime};
-use crate::{Lit, Month, Val, YearMonth};
+use crate::{Lit, Month, Val, YearMonth, str_to_number};
 use raystack_core::{Number, Ref, Symbol, TagName};
-use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
 
@@ -91,23 +90,8 @@ pub Str: String = {
 }
 
 pub Num: Number = {
-    <number:r"-?\d+(\.\d+)?[^0-9,\{\}\[\]]*"> => {
-        let re = Regex::new(r"(-?\d+(\.\d+)?)([^0-9]*)").unwrap();
-        let captures = re.captures(number).unwrap();
-
-        let float_str = captures.get(1).unwrap().as_str();
-        let float = f64::from_str(float_str).unwrap();
-
-        let unit = captures.get(3).map(|cap| cap.as_str().to_owned());
-        let unit = match unit {
-            None => None,
-            Some(raw_unit) => match &raw_unit[..] {
-                "" => None,
-                _ => Some(raw_unit),
-            },
-        };
-
-        Number::new(float, unit)
+    <number:r"-?\d+(\.\d+)?(E-?\d+)?[^0-9,\{\}\[\]]*"> => {
+        str_to_number(number)
     },
 }
 
