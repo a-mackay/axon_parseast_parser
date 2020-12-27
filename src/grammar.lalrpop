@@ -91,7 +91,7 @@ pub Str: String = {
 }
 
 pub Num: Number = {
-    <number:r"-?[0-9]+(\.[0-9]+)?[^0-9,\{\}\[\]]*"> => {
+    <number:r"-?\d+(\.\d+)?[^0-9,\{\}\[\]]*"> => {
         let re = Regex::new(r"(-?[0-9]+(\.[0-9]+)?)([^0-9]*)").unwrap();
         let captures = re.captures(number).unwrap();
 
