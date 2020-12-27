@@ -131,7 +131,19 @@ mod test {
             p.parse("12:34:56").unwrap(),
             NaiveTime::from_hms(12, 34, 56)
         );
-        assert_eq!(p.parse("12:34").unwrap(), NaiveTime::from_hms(12, 34, 0));
+    }
+
+    #[test]
+    fn time_parser_with_fractional_secs_works() {
+        let p = grammar::TimeParser::new();
+        assert_eq!(
+            p.parse("12:34:56.7").unwrap(),
+            NaiveTime::from_hms_nano(12, 34, 56, 700_000_000)
+        );
+        assert_eq!(
+            p.parse("12:34:56.789").unwrap(),
+            NaiveTime::from_hms_nano(12, 34, 56, 789_000_000)
+        );
     }
 
     #[test]

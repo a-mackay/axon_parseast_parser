@@ -43,11 +43,11 @@ pub YearMonth: YearMonth = {
 }
 
 pub Time: NaiveTime = {
-    r"[0-9]{2}:[0-9]{2}(:[0-9]{2})?" => {
-        let with_secs = NaiveTime::parse_from_str(<>, "%H:%M:%S");
-        match &with_secs {
-            Ok(_) => with_secs.unwrap(),
-            Err(_) => NaiveTime::parse_from_str(<>, "%H:%M").unwrap(),
+    r"[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?" => {
+        let with_fractional_secs = NaiveTime::parse_from_str(<>, "%H:%M:%S%.f");
+        match &with_fractional_secs {
+            Ok(_) => with_fractional_secs.unwrap(),
+            Err(_) => NaiveTime::parse_from_str(<>, "%H:%M:%S").unwrap(),
         }
     }
 }
