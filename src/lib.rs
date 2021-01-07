@@ -319,6 +319,15 @@ mod test {
     }
 
     #[test]
+    fn str_parser_dollar_sign_works() {
+        let p = grammar::StrParser::new();
+        assert_eq!(
+            p.parse(r#""\$equipRef \$navName""#).unwrap(),
+            "\\$equipRef \\$navName".to_owned()
+        );
+    }
+
+    #[test]
     fn tag_name_parser_works() {
         let p = grammar::TagNameParser::new();
         assert_eq!(

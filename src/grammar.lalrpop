@@ -77,7 +77,7 @@ DictEntry: (TagName, Box<Val>) = {
 }
 
 pub Str: String = {
-    r#""([^\\"]|\\[nt"\\])*""# => {
+    r#""([^\\"]|\\[n\$t"\\])*""# => {
         let s = <>;
         let len = s.len();
         s[1..len - 1]
