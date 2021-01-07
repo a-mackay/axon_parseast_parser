@@ -20,7 +20,6 @@ pub(crate) fn str_to_number(s: &str) -> Number {
     let captures = re.captures(s);
 
     if let Some(captures) = captures {
-        dbg!(&captures);
         let exp: i32 = captures.get(1).unwrap_or_else(|| panic!("exponent capture should contain index = 1, {}", s)).as_str().parse().unwrap_or_else(|_| panic!("exponent capture 1 should be a string containing an i32, {}", s));
         let delimiter = format!("E{}", exp);
         let mut split = s.split(&delimiter);
