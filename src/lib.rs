@@ -20,10 +20,21 @@ pub(crate) fn str_to_number(s: &str) -> Number {
     let captures = re.captures(s);
 
     if let Some(captures) = captures {
-        let exp: i32 = captures.get(1).unwrap_or_else(|| panic!("exponent capture should contain index = 1, {}", s)).as_str().parse().unwrap_or_else(|_| panic!("exponent capture 1 should be a string containing an i32, {}", s));
+        let exp_str = captures
+            .get(1)
+            .unwrap_or_else(|| {
+                panic!("exponent capture should contain index = 1, {}", s)
+            })
+            .as_str();
+        let exp: i32 = exp_str.parse().unwrap_or_else(|_| {
+            panic!(
+                "exponent capture 1 should be a string containing an i32, {}",
+                s
+            )
+        });
         let delimiter = format!("E{}", exp);
         let mut split = s.split(&delimiter);
-        let base = split
+        let _base: f64 = split
             .next()
             .unwrap_or_else(|| {
                 panic!("splitting on E\\d+ should leave a base, {}", s)
@@ -33,9 +44,12 @@ pub(crate) fn str_to_number(s: &str) -> Number {
                 panic!("base should be a string containing a f64")
             });
         let unit = split.next().map(|unit_str| unit_str.to_owned());
-        let unit = normalize_unit(unit);
+        let _unit = normalize_unit(unit);
 
-        Number::new_exponent(base, exp, unit)
+        // Number::new_exponent(base, exp, unit);
+        unimplemented!(
+            "Exponential number literals like 1e100 are not implemented"
+        );
     } else {
         let no_exp_re = Regex::new(r"(-?\d+(\.\d+)?)([^0-9]*)").unwrap();
         let captures = no_exp_re.captures(s).unwrap();
@@ -172,63 +186,6 @@ mod test {
         assert_eq!(
             str_to_number("-1.2min"),
             Number::new(-1.2, Some("min".to_owned()))
-        );
-
-        assert_eq!(str_to_number("1E7"), Number::new_exponent(1.0, 7, None));
-        assert_eq!(
-            str_to_number("1E7min"),
-            Number::new_exponent(1.0, 7, Some("min".to_owned()))
-        );
-        assert_eq!(str_to_number("-1E7"), Number::new_exponent(-1.0, 7, None));
-        assert_eq!(
-            str_to_number("-1E7min"),
-            Number::new_exponent(-1.0, 7, Some("min".to_owned()))
-        );
-        assert_eq!(str_to_number("1.2E7"), Number::new_exponent(1.2, 7, None));
-        assert_eq!(
-            str_to_number("1.2E7min"),
-            Number::new_exponent(1.2, 7, Some("min".to_owned()))
-        );
-        assert_eq!(
-            str_to_number("-1.2E7"),
-            Number::new_exponent(-1.2, 7, None)
-        );
-        assert_eq!(
-            str_to_number("-1.2E7min"),
-            Number::new_exponent(-1.2, 7, Some("min".to_owned()))
-        );
-
-        assert_eq!(
-            str_to_number("1E789"),
-            Number::new_exponent(1.0, 789, None)
-        );
-        assert_eq!(
-            str_to_number("1E789min"),
-            Number::new_exponent(1.0, 789, Some("min".to_owned()))
-        );
-        assert_eq!(
-            str_to_number("-1E789"),
-            Number::new_exponent(-1.0, 789, None)
-        );
-        assert_eq!(
-            str_to_number("-1E789min"),
-            Number::new_exponent(-1.0, 789, Some("min".to_owned()))
-        );
-        assert_eq!(
-            str_to_number("1.2E789"),
-            Number::new_exponent(1.2, 789, None)
-        );
-        assert_eq!(
-            str_to_number("1.2E789min"),
-            Number::new_exponent(1.2, 789, Some("min".to_owned()))
-        );
-        assert_eq!(
-            str_to_number("-1.2E789"),
-            Number::new_exponent(-1.2, 789, None)
-        );
-        assert_eq!(
-            str_to_number("-1.2E789min"),
-            Number::new_exponent(-1.2, 789, Some("min".to_owned()))
         );
     }
 
@@ -454,27 +411,6 @@ mod test {
         assert_eq!(
             p.parse("-123.45%").unwrap(),
             Number::new(-123.45, Some("%".to_owned()))
-        );
-    }
-
-    #[test]
-    fn number_parser_exponents_works() {
-        let p = grammar::NumParser::new();
-        assert_eq!(
-            p.parse("1E47").unwrap(),
-            Number::new_exponent(1.0, 47, None)
-        );
-        assert_eq!(
-            p.parse("-1.23E47min").unwrap(),
-            Number::new_exponent(-1.23, 47, Some("min".to_owned()))
-        );
-        assert_eq!(
-            p.parse("1.23E-18").unwrap(),
-            Number::new_exponent(1.23, -18, None)
-        );
-        assert_eq!(
-            p.parse("-1E-18min").unwrap(),
-            Number::new_exponent(-1.0, -18, Some("min".to_owned()))
         );
     }
 
