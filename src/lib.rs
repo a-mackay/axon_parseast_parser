@@ -557,4 +557,10 @@ mod test {
         let p = grammar::ValParser::new();
         p.parse(r#"{type:"partialCall", target:{type:"var", name:"utilsAssert"}, args:[null, null]}"#).unwrap();
     }
+
+    #[test]
+    fn compdef_works() {
+        let p = grammar::ValParser::new();
+        p.parse(r#"{type:"compdef", params:[{name:"cells"}], body:{type:"block", exprs:[{type:"assign", lhs:{type:"var", name:"out"}, rhs:{type:"var", name:"in"}}]}, cells:{in:{is:^number, defVal:0}, out:{is:^number, ro}}}"#).unwrap();
+    }
 }
