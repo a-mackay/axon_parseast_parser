@@ -34,7 +34,7 @@ pub(crate) fn str_to_number(s: &str) -> Number {
         });
         let delimiter = format!("E{}", exp);
         let mut split = s.split(&delimiter);
-        let _base: f64 = split
+        let significand: f64 = split
             .next()
             .unwrap_or_else(|| {
                 panic!("splitting on E\\d+ should leave a base, {}", s)
@@ -44,12 +44,9 @@ pub(crate) fn str_to_number(s: &str) -> Number {
                 panic!("base should be a string containing a f64")
             });
         let unit = split.next().map(|unit_str| unit_str.to_owned());
-        let _unit = normalize_unit(unit);
+        let unit = normalize_unit(unit);
 
-        // Number::new_exponent(base, exp, unit);
-        unimplemented!(
-            "Exponential number literals like 1e100 are not implemented"
-        );
+        Number::new_scientific(significand, exp, unit).expect("constructing a new scientific number should work")
     } else {
         let no_exp_re = Regex::new(r"(-?\d+(\.\d+)?)([^0-9]*)").unwrap();
         let captures = no_exp_re.captures(s).unwrap();
@@ -411,6 +408,44 @@ mod test {
         assert_eq!(
             p.parse("-123.45%").unwrap(),
             Number::new(-123.45, Some("%".to_owned()))
+        );
+    }
+
+    #[test]
+    fn number_parser_scientific_notation_works() {
+        let p = grammar::NumParser::new();
+        assert_eq!(
+            p.parse("1E23percent").unwrap(),
+            Number::new_scientific(1.0, 23, Some("percent".to_owned())).unwrap()
+        );
+        assert_eq!(
+            p.parse("-12E3db").unwrap(),
+            Number::new_scientific(-12.0, 3, Some("db".to_owned())).unwrap()
+        );
+        assert_eq!(
+            p.parse("1E23").unwrap(),
+            Number::new_scientific(1.0, 23, None).unwrap()
+        );
+        assert_eq!(
+            p.parse("-12E3").unwrap(),
+            Number::new_scientific(-12.0, 3, None).unwrap()
+        );
+
+        assert_eq!(
+            p.parse("1E-23percent").unwrap(),
+            Number::new_scientific(1.0, -23, Some("percent".to_owned())).unwrap()
+        );
+        assert_eq!(
+            p.parse("-12E-3db").unwrap(),
+            Number::new_scientific(-12.0, -3, Some("db".to_owned())).unwrap()
+        );
+        assert_eq!(
+            p.parse("1E-23").unwrap(),
+            Number::new_scientific(1.0, -23, None).unwrap()
+        );
+        assert_eq!(
+            p.parse("-12E-3").unwrap(),
+            Number::new_scientific(-12.0, -3, None).unwrap()
         );
     }
 
